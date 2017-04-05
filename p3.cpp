@@ -55,29 +55,20 @@ Eigen::Vector3d Luv_to_XYZ(Eigen::Vector3d Luv) {
         double u = Luv(1);
         double v = Luv(2);
 
-double var_Y = ( L * + 16 ) /116.0;
-if ( pow(var_Y, 3)  > 0.008856 ){
-    var_Y = pow(var_Y, 3);
-}
-else {
-    var_Y = ( var_Y - 16 / 116 ) / 7.787;
-}
+        double Xr = 0.9642;
+        double Yr = 1.0;
+        double Zr = 0.8249;
+        double u0 = (4.0*Xr)/(Xr+15.0*Yr+3.0*Zr);
+        double v0 = (9.0*Yr)/(Xr+15.0*Yr+3.0*Zr);
+        double Y = getYfromL(L);
+        double a = (1.0/3.0) * (((52.0 * L)/(u + (13.0 * L * u0))) - 1.0);
+        double b = -5.0*Y;
+        double c = -1.0 * (1.0 / 3.0);
+        double d = Y*(((39*L)/(v+(13*L*v0)))-5);
+        double X = (d - b)/(a - c);
+        double Z = (X*a) - b;
 
-double ReferenceX = 0.9642;
-double ReferenceY = 1.0;
-double ReferenceZ = 0.8249;
-
-double ref_U = ( 4 * ReferenceX ) / ( ReferenceX + ( 15 * ReferenceY ) + ( 3 * ReferenceZ ) );
-double ref_V = ( 9 * ReferenceY ) / ( ReferenceX + ( 15 * ReferenceY ) + ( 3 * ReferenceZ ) );
-
-double var_U = u / ( 13 * L ) + ref_U;
-double var_V = v / ( 13 * L ) + ref_V;
-
-double Y = var_Y * 100.0;
-double X =  - ( 9 * Y * var_U ) / ( ( var_U - 4 ) * var_V - var_U * var_V );
-double Z = ( 9 * Y - ( 15 * var_V * Y ) - ( var_V * X ) ) / ( 3 * var_V );
-
-    return Eigen::Vector3d(X, Y, Z);
+        return Eigen::Vector3d(X, Y, Z);
 }
 
 Eigen::Vector3d XYZ_to_RGB(Eigen::Vector3d XYZ) {
