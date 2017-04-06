@@ -283,7 +283,7 @@ void runOnWindow(int W1,int H1, int W2,int H2, Mat inputImage, char *outName) {
       double b = B[i][j];
       Eigen::Vector3d RGB(r, g, b);
       Eigen::Vector3d Yxy = RGB_to_Yxy(RGB);
-      Yxy(0) = Linear_Scale(Yxy(0), smallestY, largestY, 0, 1);
+      Yxy(0) = Linear_Scale(Yxy(0), smallestY, largestY, 0, 100);
       Eigen::Vector3d RGBdelta = Yxy_to_RGB(Yxy);
 
       R[i][j] = RGBdelta(0);
