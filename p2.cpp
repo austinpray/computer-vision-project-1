@@ -6,8 +6,75 @@ using namespace std;
 
 #include <Eigen/Dense>
 
+Eigen::Vector3d RGB_to_XYZ(Eigen::Vector3d RGB) {
+double var_R = ( RGB(0) / 255.0 );
+double var_G = ( RGB(1) / 255.0 );
+double var_B = ( RGB(2) / 255.0 );
+
+if ( var_R > 0.04045 ) {
+    var_R = pow(( ( var_R + 0.055 ) / 1.055 ) , 2.4);
+} else {
+    var_R = var_R / 12.92;
+}
+if ( var_G > 0.04045 ){
+    var_G = pow(( ( var_G + 0.055 ) / 1.055 ) , 2.4);
+} else {
+ var_G = var_G / 12.92;
+}
+if ( var_B > 0.04045 ){
+    var_B = pow(( ( var_B + 0.055 ) / 1.055 ) , 2.4);
+}
+else {
+ var_B = var_B / 12.92;
+}
+
+var_R = var_R * 100;
+var_G = var_G * 100;
+var_B = var_B * 100;
+
+double X = var_R * 0.4124 + var_G * 0.3576 + var_B * 0.1805;
+double Y = var_R * 0.2126 + var_G * 0.7152 + var_B * 0.0722;
+double Z = var_R * 0.0193 + var_G * 0.1192 + var_B * 0.9505;
+
+return Eigen::Vector3d(X, Y, Z);
+}
+
+Eigen::Vector3d XYZ_to_Luv(Eigen::Vector3d XYZ) {
+    double X = XYZ(0);
+    double Y = XYZ(1);
+    double Z = XYZ(2);
+
+    double var_U = ( 4.0 * X ) / ( X + ( 15.0 * Y ) + ( 3.0 * Z ) );
+    double var_V = ( 9.0 * Y ) / ( X + ( 15.0 * Y ) + ( 3.0 * Z ) );
+
+    double var_Y = Y / 100;
+
+    if ( var_Y > 0.008856 ) {
+        var_Y = pow(var_Y , ( 1.0/3.0 ));
+    } else {
+        var_Y = (7.787 * var_Y) + (16.0 / 116.0);
+    }
+
+    double ReferenceX = 95.047;
+    double ReferenceY = 100.0;
+    double ReferenceZ = 108.883;
+    double ref_U = ( 4.0 * ReferenceX ) / ( ReferenceX + ( 15.0 * ReferenceY ) + ( 3.0 * ReferenceZ ) );
+    double ref_V = ( 9.0 * ReferenceY ) / ( ReferenceX + ( 15.0 * ReferenceY ) + ( 3.0 * ReferenceZ ) );
+
+    double L = ( 116 * var_Y ) - 16;
+    double u = 13 * L * ( var_U - ref_U );
+    double v = 13 * L * ( var_V - ref_V );
+
+    return Eigen::Vector3d(L, u, v);
+}
 
 Eigen::Vector3d RGB_to_Luv(Eigen::Vector3d RGB) {
+    Eigen::Vector3d XYZ = RGB_to_XYZ(RGB);
+    //cout << "XYZ:\n" << XYZ << "\n";
+    return XYZ_to_Luv(XYZ);
+}
+
+Eigen::Vector3d RGB_to_Luv_V1(Eigen::Vector3d RGB) {
     Eigen::Matrix3d rgbmat;
     rgbmat << 0.412453, 0.357580, 0.180423,
        0.212671, 0.715160, 0.072169,
@@ -54,28 +121,32 @@ Eigen::Vector3d Luv_to_XYZ(Eigen::Vector3d Luv) {
         double L = Luv(0);
         double u = Luv(1);
         double v = Luv(2);
+    //cout << "inside Luv_to_XYZ ";
+    //cout << "L=" << L << " u=" << u << " v=" << v << "\n";
 
-double var_Y = ( L * + 16 ) /116.0;
+double var_Y = ( L + 16.0 ) /116.0;
 if ( pow(var_Y, 3)  > 0.008856 ){
     var_Y = pow(var_Y, 3);
 }
 else {
-    var_Y = ( var_Y - 16 / 116 ) / 7.787;
+    var_Y = ( var_Y - 16.0 / 116.0 ) / 7.787;
 }
 
-double ReferenceX = 0.9642;
-double ReferenceY = 1.0;
-double ReferenceZ = 0.8249;
+    double ReferenceX = 95.047;
+    double ReferenceY = 100.0;
+    double ReferenceZ = 108.883;
 
-double ref_U = ( 4 * ReferenceX ) / ( ReferenceX + ( 15 * ReferenceY ) + ( 3 * ReferenceZ ) );
-double ref_V = ( 9 * ReferenceY ) / ( ReferenceX + ( 15 * ReferenceY ) + ( 3 * ReferenceZ ) );
+double ref_U = ( 4.0 * ReferenceX ) / ( ReferenceX + ( 15.0 * ReferenceY ) + ( 3.0 * ReferenceZ ) );
+double ref_V = ( 9.0 * ReferenceY ) / ( ReferenceX + ( 15.0 * ReferenceY ) + ( 3.0 * ReferenceZ ) );
 
-double var_U = u / ( 13 * L ) + ref_U;
-double var_V = v / ( 13 * L ) + ref_V;
+double var_U = u / ( 13.0 * L ) + ref_U;
+double var_V = v / ( 13.0 * L ) + ref_V;
 
 double Y = var_Y * 100.0;
-double X =  - ( 9 * Y * var_U ) / ( ( var_U - 4 ) * var_V - var_U * var_V );
-double Z = ( 9 * Y - ( 15 * var_V * Y ) - ( var_V * X ) ) / ( 3 * var_V );
+double X =  -1 * ( 9.0 * Y * var_U ) / ( ( var_U - 4.0 ) * var_V - var_U * var_V );
+double Z = ( 9.0 * Y - ( 15.0 * var_V * Y ) - ( var_V * X ) ) / ( 3 * var_V );
+    //cout << "inside Luv_to_XYZ ";
+    //cout << "X=" << X << " Y=" << Y << " Z=" << Z << "\n";
 
     return Eigen::Vector3d(X, Y, Z);
 }
@@ -157,7 +228,7 @@ void runOnWindow(int W1,int H1, int W2,int H2, Mat inputImage, char *outName) {
       double r = R[i][j];
       double g = G[i][j];
       double b = B[i][j];
-      Eigen::Vector3d RGB(r/255.0, g/255.0, b/255.0);
+      Eigen::Vector3d RGB(r, g, b);
 
       Eigen::Vector3d Luv = RGB_to_Luv(RGB);
 
@@ -177,18 +248,25 @@ void runOnWindow(int W1,int H1, int W2,int H2, Mat inputImage, char *outName) {
 
     }
   }
+    cout << "small\n" << smallestL << "\nbig\n" << largestL << "\n";
   for(int i = H1 ; i <= H2 ; i++) {
     for(int j = W1 ; j <= W2 ; j++) {
       double r = R[i][j];
       double g = G[i][j];
       double b = B[i][j];
-      Eigen::Vector3d RGB(r/255.0, g/255.0, b/255.0);
+      Eigen::Vector3d RGB(r, g, b);
+        //cout << "RGB:\n" << RGB << "\n";
 
       Eigen::Vector3d Luv = RGB_to_Luv(RGB);
+        //cout << "LUV:\n" << Luv << "\n";
 
+        //cout << "before\n" << Luv(0) << "\n";
       Luv(0) = Linear_Scale(Luv(0), smallestL, largestL, 0, 100);
+        //cout << "after\n" << Luv(0) << "\n";
       Eigen::Vector3d XYZ = Luv_to_XYZ(Luv);
+        //cout << "XYZ:\n" << XYZ << "\n";
       Eigen::Vector3d RGBdelta = XYZ_to_RGB(XYZ);
+        //cout << "RGBdelta:\n" << RGBdelta << "\n";
 
       R[i][j] = RGBdelta(0);
       G[i][j] = RGBdelta(1);
@@ -237,12 +315,12 @@ int main(int argc, char** argv) {
 
   Mat inputImage = imread(inputName, CV_LOAD_IMAGE_UNCHANGED);
   if(inputImage.empty()) {
-    cout <<  "Could not open or find the image " << inputName << endl;
+    //cout <<  "Could not open or find the image " << inputName << endl;
     return(-1);
   }
 
   if(inputImage.type() != CV_8UC3) {
-    cout <<  inputName << " is not a standard color image  " << endl;
+    //cout <<  inputName << " is not a standard color image  " << endl;
     return(-1);
   }
 
