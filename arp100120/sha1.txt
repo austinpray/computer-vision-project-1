@@ -1,2 +1,2 @@
-these images were generated with the following git sha1:
-863f2734a893fc9d250307d331981ea16e40b568
+These images were generated with the following git sha1:
+8ff6e5eda6f5b7ea8f0077feac366e6b15417730
