@@ -93,10 +93,10 @@ int main(int argc, char** argv) {
 	r2 = (int) (2.5623 * X2 + (-1.1661) * Y2 + (-0.3962) * Z2) * 255;
     g2 = (int) ((-1.0215) * X2 + 1.9778 * Y2 + 0.0437 * Z2) * 255;
     b2 = (int) (0.0752 * X2 + (-0.2562) * Y2 + 1.1810 * Z2) * 255;
-    cout << "working\n";
-    cout << r1 << "\n" << X << "\n";
-    cout << "not working \n";
-    cout << r2 << "\n" << X2 << "\n";
+    //cout << "working\n";
+    //cout << r1 << "\n" << X << "\n";
+    //cout << "not working \n";
+    //cout << r2 << "\n" << X2 << "\n";
 	// end
 
 	RED1[i][j] = r1;
@@ -132,12 +132,12 @@ int main(int argc, char** argv) {
   Mat xyY_planes[] = {B1, G1, R1};
   merge(xyY_planes, 3, xyY);
   namedWindow("xyY",CV_WINDOW_AUTOSIZE);
-  imwrite("xyY.bmp", xyY);
+  imwrite("xyY.png", xyY);
 
   Mat Luv;
   Mat Luv_planes[] = {B2, G2, R2};
   merge(Luv_planes, 3, Luv);
   namedWindow("Luv",CV_WINDOW_AUTOSIZE);
-  imwrite("Luv.bmp", Luv);
+  imwrite("Luv.png", Luv);
   return(0);
 }
