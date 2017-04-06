@@ -8,4 +8,10 @@ p1: p1.cpp
 p2: p2.cpp
 	llvm-g++ -g -o p2 p2.cpp $(CPPFLAGS)
 
-all: p1 p2 ;
+p3: p3.cpp
+	llvm-g++ -g -o p3 p3.cpp $(CPPFLAGS)
+
+p4: p4.cpp
+	llvm-g++ -g -o p4 p4.cpp $(CPPFLAGS)
+
+all: p1 p2 p3 p4;

@@ -1272,6 +1272,6 @@ set(SOURCE_FILES
         eigen/unsupported/test/splines.cpp
         p1.cpp
         p2.cpp
-        p3.cpp)
+        )
 
 add_executable(cv_project_1 ${SOURCE_FILES})
